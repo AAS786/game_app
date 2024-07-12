@@ -13,20 +13,6 @@ if 'selected_contact' not in st.session_state:
 # In-memory storage for notifications
 notifications = []
 
-# Initialize the game board
-if 'board' not in st.session_state:
-    st.session_state.board = [' ' for _ in range(9)]
-if 'current_player' not in st.session_state:
-    st.session_state.current_player = 'X'
-if 'winner' not in st.session_state:
-    st.session_state.winner = None
-if 'player_X' not in st.session_state:
-    st.session_state.player_X = ''
-if 'player_O' not in st.session_state:
-    st.session_state.player_O = ''
-if 'game_started' not in st.session_state:
-    st.session_state.game_started = False
-
 # Function to add a contact
 def add_contact(name, phone, email):
     st.session_state.contacts.append({"name": name, "phone": phone, "email": email})
@@ -44,27 +30,6 @@ def add_notification(message, reminder_time):
 def delete_notification(index):
     if 0 <= index < len(notifications):
         del notifications[index]
-
-# Function to check the winner of Tic Tac Toe
-def check_winner(board):
-    winning_combinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], # rows
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], # columns
-        [0, 4, 8], [2, 4, 6]             # diagonals
-    ]
-    for combo in winning_combinations:
-        if board[combo[0]] == board[combo[1]] == board[combo[2]] and board[combo[0]] != ' ':
-            return board[combo[0]]
-    if ' ' not in board:
-        return 'Tie'
-    return None
-
-# Function to reset the Tic Tac Toe game
-def reset_game():
-    st.session_state.board = [' ' for _ in range(9)]
-    st.session_state.current_player = 'X'
-    st.session_state.winner = None
-    st.session_state.game_started = False
 
 # Function to determine the winner of Rock Paper Scissors
 def determine_winner(player_choice, computer_choice):
@@ -114,6 +79,41 @@ def calculate_accuracy(original, typed):
     accuracy = (correct_words / total_words) * 100
     return accuracy
 
+# Function to check for a winner in Tic Tac Toe
+def check_winner(board):
+    winning_combinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # columns
+        [0, 4, 8], [2, 4, 6]              # diagonals
+    ]
+    for combo in winning_combinations:
+        if board[combo[0]] == board[combo[1]] == board[combo[2]] != ' ':
+            return board[combo[0]]
+    if ' ' not in board:
+        return 'Tie'
+    return None
+
+# Function to reset the Tic Tac Toe game
+def reset_game():
+    st.session_state.board = [' '] * 9
+    st.session_state.current_player = 'X'
+    st.session_state.winner = None
+    st.session_state.game_started = False
+
+# Initialize session state variables for Tic Tac Toe
+if 'board' not in st.session_state:
+    reset_game()
+if 'game_started' not in st.session_state:
+    st.session_state.game_started = False
+
+# Function to handle player move
+def make_move(idx):
+    if st.session_state.board[idx] == ' ' and not st.session_state.winner:
+        st.session_state.board[idx] = st.session_state.current_player
+        st.session_state.winner = check_winner(st.session_state.board)
+        if not st.session_state.winner:
+            st.session_state.current_player = 'O' if st.session_state.current_player == 'X' else 'X'
+
 # Main function to display the entire web page
 def main():
     st.title("Streamlit Multi-App Example")
@@ -122,7 +122,7 @@ def main():
     st.sidebar.title("Navigation")
     app_mode = st.sidebar.selectbox(
         "Choose the app",
-        ["Calculator", "Contact Diary", "Notification App", "Tic Tac Toe", "Rock Paper Scissors", "Dice Rolling Simulator", "Yearly Calendar", "Typing Speed Test"]
+        ["Calculator", "Contact Diary", "Notification App", "Rock Paper Scissors", "Dice Rolling Simulator", "Yearly Calendar", "Typing Speed Test", "Tic Tac Toe"]
     )
 
     # Display selected app
@@ -180,10 +180,12 @@ def main():
     elif app_mode == "Notification App":
         st.header("Notification App")
         message = st.text_input("Enter your notification message")
-        reminder_time = st.date_input("Select reminder date")
+        reminder_date = st.date_input("Select reminder date")
+        reminder_time = st.time_input("Select reminder time")
+
         if st.button("Set Reminder"):
-            if message and reminder_time:
-                reminder_datetime = datetime.combine(reminder_time, datetime.min.time())
+            if message and reminder_date and reminder_time:
+                reminder_datetime = datetime.combine(reminder_date, reminder_time)
                 add_notification(message, reminder_datetime)
                 st.success("Reminder set successfully!")
             else:
@@ -194,11 +196,56 @@ def main():
             for index, notification in enumerate(notifications):
                 st.write(f"Message: {notification['message']}")
                 st.write(f"Reminder Time: {notification['reminder_time'].strftime('%Y-%m-%d %H:%M:%S')}")
-                if st.button(f"Delete Notification {index+1}", key=index):
+                if st.button(f"Delete Notification {index + 1}", key=index):
                     delete_notification(index)
                     st.success("Notification deleted successfully!")
         else:
             st.write("No notifications set.")
+
+    elif app_mode == "Rock Paper Scissors":
+        st.header("Rock Paper Scissors")
+        player_choice = st.selectbox("Choose your weapon", ["Rock", "Paper", "Scissors"])
+        if st.button("Play"):
+            computer_choice = random.choice(["Rock", "Paper", "Scissors"])
+            result = determine_winner(player_choice, computer_choice)
+            st.write(f"Computer chose: {computer_choice}")
+            st.write(result)
+
+    elif app_mode == "Dice Rolling Simulator":
+        st.header("Dice Rolling Simulator")
+        roll_dice()
+
+    elif app_mode == "Yearly Calendar":
+        st.header("Yearly Calendar")
+        year = st.number_input("Enter the year", min_value=1900, max_value=2100, step=1, value=datetime.now().year)
+        display_calendar(year)
+
+    elif app_mode == "Typing Speed Test":
+        st.header("Typing Speed Test")
+        sample_texts = ['''
+        Streamlit is an open-source app framework for Machine Learning and Data Science teams.\n
+        It is incredibly easy to build beautiful, custom web apps using Streamlit.\n
+        Streamlit is the fastest way to build and share data apps.\n
+        With Streamlit, you can turn data scripts into shareable web apps in minutes.\n
+        Streamlit apps are Python scripts that run as web applications.
+        ''']
+        original_text = random.choice(sample_texts)
+
+        st.write("Type the following text as quickly and accurately as you can:")
+        st.write(original_text)
+
+        start_button = st.button("Start Test")
+        if start_button:
+            start_time = time.time()
+            typed_text = st.text_area("Start typing here:")
+            end_time = time.time()
+
+            if typed_text:
+                wpm = calculate_wpm(start_time, end_time, typed_text)
+                accuracy = calculate_accuracy(original_text, typed_text)
+
+                st.write(f"Your typing speed: {wpm:.2f} words per minute")
+                st.write(f"Your typing accuracy: {accuracy:.2f}%")
 
     elif app_mode == "Tic Tac Toe":
         st.title("Tic Tac Toe")
@@ -233,21 +280,6 @@ def main():
                 background-color: #2196F3 !important;
                 color: black !important;
             }
-            .header {
-                color: #4CAF50;
-                font-size: 32px;
-                font-weight: bold;
-            }
-            .subheader {
-                color: #2196F3;
-                font-size: 24px;
-                font-weight: bold;
-            }
-            .footer {
-                color: #333;
-                font-size: 20px;
-                font-weight: bold;
-            }
             </style>
             """,
             unsafe_allow_html=True
@@ -276,14 +308,12 @@ def main():
                     if button_text == ' ':
                         button_text = ''
                     if st.session_state.board[idx] == ' ':
-                        if col.button(button_text, key=idx, on_click=lambda idx=idx: make_move(idx)):
-                            st.session_state.board[idx] = st.session_state.current_player
-                            st.session_state.current_player = 'O' if st.session_state.current_player == 'X' else 'X'
-                            st.session_state.winner = check_winner(st.session_state.board)
-                            if st.session_state.winner:
-                                st.experimental_rerun()
+                        if col.button(button_text, key=idx):
+                            make_move(idx)
+                            st.experimental_rerun()
                     else:
-                        col.button(button_text, key=idx, disabled=True, className=f"tic-tac-toe-button-{st.session_state.board[idx].lower()}")
+                        html = f'<button class="tic-tac-toe-button tic-tac-toe-button-{st.session_state.board[idx].lower()}" disabled>{st.session_state.board[idx]}</button>'
+                        col.markdown(html, unsafe_allow_html=True)
 
             if st.session_state.winner:
                 if st.session_state.winner == 'Tie':
@@ -294,60 +324,6 @@ def main():
                 if st.button("Reset Game"):
                     reset_game()
                     st.experimental_rerun()
-
-    elif app_mode == "Rock Paper Scissors":
-        st.header("Rock Paper Scissors")
-        player_choice = st.selectbox("Choose your weapon", ["Rock", "Paper", "Scissors"])
-        if st.button("Play"):
-            computer_choice = random.choice(["Rock", "Paper", "Scissors"])
-            result = determine_winner(player_choice, computer_choice)
-            st.write(f"Computer chose: {computer_choice}")
-            st.write(result)
-
-    elif app_mode == "Dice Rolling Simulator":
-        st.header("Dice Rolling Simulator")
-        roll_dice()
-
-    elif app_mode == "Yearly Calendar":
-        st.header("Yearly Calendar")
-        year = st.number_input("Enter the year", min_value=1900, max_value=2100, step=1, value=datetime.now().year)
-        display_calendar(year)
-
-    elif app_mode == "Typing Speed Test":
-        st.header("Typing Speed Test")
-        sample_texts = ['''
-    Streamlit is an open-source app framework for Machine Learning and Data Science teams.\n
-    It is incredibly easy to build beautiful, custom web apps using Streamlit.\n
-    Streamlit is the fastest way to build and share data apps.\n
-    With Streamlit, you can turn data scripts into shareable web apps in minutes.\n
-    Streamlit apps are Python scripts that run as web applications.
-''']
-        original_text = random.choice(sample_texts)
-
-        st.write("Type the following text as quickly and accurately as you can:")
-        st.write(original_text)
-
-        start_button = st.button("Start Test")
-        if start_button:
-            start_time = time.time()
-            typed_text = st.text_area("Start typing here:")
-            end_time = time.time()
-
-            if typed_text:
-                wpm = calculate_wpm(start_time, end_time, typed_text)
-                accuracy = calculate_accuracy(original_text, typed_text)
-
-                st.write(f"Your typing speed: {wpm:.2f} words per minute")
-                st.write(f"Your typing accuracy: {accuracy:.2f}%")
-
-# Function to make a move in Tic Tac Toe
-def make_move(idx):
-    if st.session_state.board[idx] == ' ':
-        st.session_state.board[idx] = st.session_state.current_player
-        st.session_state.current_player = 'O' if st.session_state.current_player == 'X' else 'X'
-        st.session_state.winner = check_winner(st.session_state.board)
-        if st.session_state.winner:
-            st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
