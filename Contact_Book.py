@@ -57,6 +57,7 @@ def display_calendar(year):
     cal = calendar.TextCalendar(calendar.SUNDAY)
     st.text(cal.formatyear(year, 2, 1, 1, 3))
 
+
 # Function to count words
 def count_words(text):
     words = text.split()
@@ -114,19 +115,153 @@ def make_move(idx):
         if not st.session_state.winner:
             st.session_state.current_player = 'O' if st.session_state.current_player == 'X' else 'X'
 
-# Main function to display the entire web page
+# Expanded list of Truth questions
+truths = [
+    "What's the most embarrassing thing you've ever done?",
+    "What's a secret you've never told anyone?",
+    "Who was your first crush?",
+    "What's the biggest lie you've ever told?",
+    "What's the most embarrassing thing you've ever worn?",
+    "Have you ever cheated on a test?",
+    "What's the weirdest dream you've ever had?",
+    "Have you ever stolen something?",
+    "What's your biggest fear?",
+    "What's the most childish thing you still do?",
+    "Who is your secret crush?",
+    "What's your worst habit?",
+    "What's the most embarrassing thing you've said to someone you like?",
+    "What's the most embarrassing thing in your room?",
+    "Have you ever lied to your best friend?",
+    "What's the craziest thing you've done on a dare?",
+    "Have you ever peed in a pool?",
+    "What's the longest you've gone without showering?",
+    "Have you ever pretended to be sick to get out of something?",
+    "What's the grossest thing you've ever done?",
+    "What's the most awkward date you've ever been on?",
+    "Have you ever been caught picking your nose?",
+    "What's the most embarrassing nickname you've ever had?",
+    "What's the worst gift you've ever received?",
+    "What's the weirdest food combination you've ever tried?",
+    "Have you ever had a crush on a friend's sibling?",
+    "What's the most embarrassing photo of you?",
+    "What's the biggest rumor you've ever spread?",
+    "What's the most embarrassing thing you've done in public?",
+    "Have you ever farted in an elevator?",
+    "What's the most awkward thing you've said in public?",
+    "Have you ever snooped through someone's stuff?",
+    "What's the most disgusting thing you've ever eaten?",
+    "What's the most embarrassing thing you've done for attention?",
+    "What's the weirdest thing you've ever done alone?",
+    "Have you ever talked to yourself in the mirror?",
+    "What's the worst thing you've ever smelled?",
+    "Have you ever worn the same clothes for a week?",
+    "What's the worst haircut you've ever had?",
+    "Have you ever been caught singing in the shower?",
+    "What's the most embarrassing thing you've done in front of a crowd?",
+    "What's the worst thing you've ever tasted?",
+    "What's the most embarrassing thing you've done on a date?",
+    "What's the most childish thing you've done recently?",
+    "What's the most embarrassing thing you've posted online?",
+    "Have you ever lied about your age?",
+    "What's the most embarrassing thing your parents have caught you doing?",
+    "What's the most awkward text you've ever sent?",
+    "What's the weirdest thing you've ever Googled?"
+]
+
+# Expanded list of Dare tasks
+dares = [
+    "Dance with no music for 1 minute.",
+    "Let someone tickle you for 30 seconds.",
+    "Try to lick your elbow.",
+    "Do an impression of your favorite celebrity.",
+    "Talk in an accent for the next 3 rounds.",
+    "Do 20 pushups.",
+    "Sing the chorus of your favorite song.",
+    "Let someone draw on your face with a pen.",
+    "Wear socks on your hands until your next turn.",
+    "Do your best chicken dance outside on the lawn.",
+    "Eat a spoonful of mustard.",
+    "Run around the outside of the house three times.",
+    "Let someone write a word on your forehead in a marker.",
+    "Do your best impression of a baby being born.",
+    "Try to walk on your knees until your next turn.",
+    "Let someone give you a wedgie.",
+    "Eat a raw onion slice.",
+    "Imitate a monkey until your next turn.",
+    "Let someone else do your hair however they want.",
+    "Talk in an accent until your next turn.",
+    "Pretend to be a waiter/waitress and take snack orders from everyone in the group.",
+    "Try to juggle 3 items (they don’t have to be balls).",
+    "Make a silly face and keep it that way until the next round.",
+    "Let the person to your left draw on your face with a pen.",
+    "Eat a raw egg.",
+    "Dump a glass of cold water over your head.",
+    "Hold your breath for 10 seconds.",
+    "Speak in pig Latin for the next 3 rounds.",
+    "Let someone pour ice down your shirt and pants.",
+    "Imitate a celebrity of the group’s choosing every time you talk.",
+    "Let someone give you a makeover.",
+    "Talk without moving your lips until your next turn.",
+    "Let someone tickle you for one minute.",
+    "Go outside and shout as loud as you can, 'I believe in fairies!'",
+    "Let the group give you a new hairstyle.",
+    "Wear your clothes backward for the next hour.",
+    "Try to lick your foot.",
+    "Eat a spoonful of hot sauce.",
+    "Act like a chicken until your next turn.",
+    "Let someone in the group write a word on your forehead in a marker.",
+    "Eat a raw clove of garlic.",
+    "Wear socks on your hands until it's your turn again.",
+    "Do 20 jumping jacks.",
+    "Let someone else tickle you for 30 seconds.",
+    "Put ice cubes down your back.",
+    "Do your best impression of a baby being born.",
+    "Imitate a monkey until it's your turn again.",
+    "Speak in an accent chosen by the group until your next turn.",
+    "Imitate a celebrity until it's your turn again."
+]
+
+# Main function to display the game
+def truth_or_dare_game():
+    st.title("Truth or Dare Game")
+
+    st.write("***Welcome to the Truth or Dare game!***")
+    st.write("**Press one of the buttons below to get a task.**")
+
+    # Creating columns for side-by-side buttons
+    col1, col2 = st.columns(2)
+
+    button_style = """
+        <style>
+        .stButton button {
+            width: 100%;
+            height: 100px;
+            font-size: 20px;
+        }
+        </style>
+    """
+
+    st.markdown(button_style, unsafe_allow_html=True)
+
+    with col1:
+        if st.button("***Truth***"):
+            task = random.choice(truths)
+            st.subheader("Truth Task")
+            st.write(task)
+
+    with col2:
+        if st.button("***Dare***"):
+            task = random.choice(dares)
+            st.subheader("Dare Task")
+            st.write(task)
+
+# Main function to display the multi-app interface
 def main():
-    st.title("Streamlit Multi-App Example")
+    st.sidebar.title("Multi-App Navigation")
+    app_choice = st.sidebar.selectbox("Choose an app", ["Truth or Dare", "Calculator", "Contact Diary", "Notification App", "Rock Paper Scissors", "Dice Rolling Simulator",
+                                                        "Yearly Calendar", "Typing Speed Test", "Tic Tac Toe"])
 
-    # Sidebar navigation
-    st.sidebar.title("Navigation")
-    app_mode = st.sidebar.selectbox(
-        "Choose the app",
-        ["Calculator", "Contact Diary", "Notification App", "Rock Paper Scissors", "Dice Rolling Simulator", "Yearly Calendar", "Typing Speed Test", "Tic Tac Toe"]
-    )
-
-    # Display selected app
-    if app_mode == "Calculator":
+    if app_choice == "Calculator":
         st.header("Simple Calculator")
         num1 = st.number_input("Enter first number", format="%.2f")
         num2 = st.number_input("Enter second number", format="%.2f")
@@ -145,7 +280,7 @@ def main():
                     result = "Error! Division by zero."
             st.write(f"The result is: {result}")
 
-    elif app_mode == "Contact Diary":
+    elif app_choice == "Contact Diary":
         st.header("Contact Book Application")
         name = st.text_input("Name")
         phone = st.text_input("Phone")
@@ -177,7 +312,7 @@ def main():
         else:
             st.sidebar.text("No contacts available.")
 
-    elif app_mode == "Notification App":
+    elif app_choice == "Notification App":
         st.header("Notification App")
         message = st.text_input("Enter your notification message")
         reminder_date = st.date_input("Select reminder date")
@@ -202,25 +337,28 @@ def main():
         else:
             st.write("No notifications set.")
 
-    elif app_mode == "Rock Paper Scissors":
-        st.header("Rock Paper Scissors")
-        player_choice = st.selectbox("Choose your weapon", ["Rock", "Paper", "Scissors"])
+    elif app_choice == "Rock Paper Scissors":
+        st.title("Rock Paper Scissors")
+        st.write("Play Rock Paper Scissors against the computer!")
+        
+        player_choice = st.selectbox("Choose your move", ["Rock", "Paper", "Scissors"])
+        computer_choice = random.choice(["Rock", "Paper", "Scissors"])
         if st.button("Play"):
-            computer_choice = random.choice(["Rock", "Paper", "Scissors"])
-            result = determine_winner(player_choice, computer_choice)
+            winner = determine_winner(player_choice, computer_choice)
+            st.write(f"You chose: {player_choice}")
             st.write(f"Computer chose: {computer_choice}")
-            st.write(result)
+            st.write(f"Result: {winner}")
 
-    elif app_mode == "Dice Rolling Simulator":
-        st.header("Dice Rolling Simulator")
+    elif app_choice == "Dice Rolling Simulator":
+        st.title("Dice Rolling Simulator")
         roll_dice()
 
-    elif app_mode == "Yearly Calendar":
+    elif app_choice == "Yearly Calendar":
         st.header("Yearly Calendar")
         year = st.number_input("Enter the year", min_value=1900, max_value=2100, step=1, value=datetime.now().year)
         display_calendar(year)
 
-    elif app_mode == "Typing Speed Test":
+    elif app_choice == "Typing Speed Test":
         st.header("Typing Speed Test")
         sample_texts = ['''
         Streamlit is an open-source app framework for Machine Learning and Data Science teams.\n
@@ -234,20 +372,37 @@ def main():
         st.write("Type the following text as quickly and accurately as you can:")
         st.write(original_text)
 
+        if 'start_time' not in st.session_state:
+            st.session_state.start_time = None
+        if 'typed_text' not in st.session_state:
+            st.session_state.typed_text = ''
+
         start_button = st.button("Start Test")
         if start_button:
-            start_time = time.time()
-            typed_text = st.text_area("Start typing here:")
-            end_time = time.time()
+            st.session_state.start_time = time.time()
+            st.session_state.typed_text = ''
 
-            if typed_text:
-                wpm = calculate_wpm(start_time, end_time, typed_text)
-                accuracy = calculate_accuracy(original_text, typed_text)
+        if st.session_state.start_time:
+            elapsed_time = time.time() - st.session_state.start_time
+            remaining_time = max(60 - elapsed_time, 0)  # 60 seconds countdown
+
+            st.write(f"Time remaining: {remaining_time:.2f} seconds")
+
+            if remaining_time <= 0:
+                st.write("Time is up!")
+                end_time = time.time()
+                wpm = calculate_wpm(st.session_state.start_time, end_time, st.session_state.typed_text)
+                accuracy = calculate_accuracy(original_text, st.session_state.typed_text)
 
                 st.write(f"Your typing speed: {wpm:.2f} words per minute")
                 st.write(f"Your typing accuracy: {accuracy:.2f}%")
 
-    elif app_mode == "Tic Tac Toe":
+                st.session_state.start_time = None  # Reset start time
+            else:
+                st.session_state.typed_text = st.text_area("Start typing here:", value=st.session_state.typed_text)
+                st.button("Submit")
+
+    elif app_choice == "Tic Tac Toe":
         st.title("Tic Tac Toe")
         st.markdown(
             """
@@ -324,6 +479,9 @@ def main():
                 if st.button("Reset Game"):
                     reset_game()
                     st.experimental_rerun()
+            
+    elif app_choice == "Truth or Dare":
+        truth_or_dare_game()
 
 if __name__ == "__main__":
     main()
